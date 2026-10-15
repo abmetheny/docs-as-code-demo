@@ -1,0 +1,14 @@
+site_name: Docs-as-Code Demo
+site_description: Documentation for a sample REST API, deployed with Docker and Kubernetes, built with MkDocs and OpenAPI.
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Concepts: concepts.md
+  - How-To Guides:
+      - Deploy to Kubernetes: how-to/deploy-to-kubernetes.md
+      - Scale and Update: how-to/scale-and-update.md
+  - Reference:
+      - API Reference: reference/api.md
+  - Troubleshooting: troubleshooting.md
+  - Release Notes: release-notes.md
+  - Style Guide: style-guide.md

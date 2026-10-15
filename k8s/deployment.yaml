@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: items-api
+  labels:
+    app: items-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: items-api
+  template:
+    metadata:
+      labels:
+        app: items-api
+    spec:
+      containers:
+        - name: items-api
+          image: items-api:1.0.0
+          # The image is loaded into the local cluster with `kind load docker-image`,
+          # so Kubernetes should not try to pull it from a registry.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Items API
+  version: 1.0.0
+  description: >
+    A small example REST API for storing items in memory. It exists to practice
+    containerizing, deploying to Kubernetes, and documenting software.
+    Data is lost when the server restarts.
+servers:
+  - url: http://localhost:8080
+    description: Local development (docker run or kubectl port-forward)
+paths:
+  /health:
+    get:
+      summary: Check service health
+      description: Returns the service status and version. Used by Kubernetes probes.
+      operationId: getHealth
+      responses:
+        "200":
+          description: The service is running.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              example:
+                status: ok
+                version: 1.0.0
+  /items:
+    get:
+      summary: List all items
+      operationId: listItems
+      responses:
+        "200":
+          description: An array of items. The array is empty if no items exist.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+    post:
+      summary: Create an item
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewItem"
+            example:
+              name: Headlamp
+              quantity: 3
+      responses:
+        "201":
+          description: The item was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "400":
+          description: The request body is not valid JSON or fails validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: INVALID_REQUEST
+                  message: "'name' is required and must be a non-empty string."
+  /items/{id}:
+    get:
+      summary: Get one item
+      operationId: getItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The numeric id of the item.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: The requested item.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: No item exists with that id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: "No item with id '9999'."
+components:
+  schemas:
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+        version:
+          type: string
+    NewItem:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          description: The item name. Leading and trailing spaces are removed.
+        quantity:
+          type: integer
+          minimum: 0
+          default: 1
+          description: How many of the item. Must be a whole number, 0 or greater.
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: A stable machine-readable error code.
+            message:
+              type: string
+              description: A human-readable explanation.
